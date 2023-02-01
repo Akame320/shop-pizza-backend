@@ -35,9 +35,9 @@ const Categories = sequelize.define('categories', {
     name: { type: DataTypes.STRING, allowNull: false },
 }, {timestamps: false})
 
-const SizePizza = sequelize.define('pizza_size', {}, { timestamps: false, unique: false });
+const SizePizza = sequelize.define('pizza_size', {price: DataTypes.INTEGER}, { timestamps: false, unique: false });
 const CategoriesPizza = sequelize.define('pizza_categories', {}, { timestamps: false, unique: false });
-const DoughPizza = sequelize.define('pizza_dough', {}, { timestamps: false, unique: false })
+const DoughPizza = sequelize.define('pizza_dough', {price: DataTypes.INTEGER}, { timestamps: false, unique: false })
 const PizzaBasket = sequelize.define('pizza_basket', {
     size: { type: DataTypes.STRING, allowNull: false },
     dough: { type: DataTypes.STRING, allowNull: false },

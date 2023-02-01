@@ -39,7 +39,7 @@ class PizzaController {
         if (!id) return next(ApiError.badRequest('Нет обязательного параметра -:- id'))
 
         const pizza = await Pizza.findByPk(id)
-        if (!pizza) return next(ApiError.badRequest(`По id - ${id} ничего найти не удалось`))
+        if (!pizza) return next(ApiError.badRequest(`Нет пиццы с id -:- ${id}`))
         res.json({ data: pizza })
     }
 
@@ -69,22 +69,14 @@ class PizzaController {
             { where: { id } }
         )
 
-        console.log('Yeeess')
-
         await CategoriesController.categoriesAddTo(id, categoriesId.split(','), next)
-
-        console.log('Yeeess 1')
         await SizeController.sizesAddTo(id, sizesId.split(','), next)
-
-        console.log('Yeeess 2')
         await DoughController.doughsAddTo(id, doughsId.split(','), next)
 
-        console.log('Yeeess 3')
         const pizzas = await Pizza.findAll({
             order: [['name', 'ASC']],
             include: [Size, Dough, Categories]
         })
-
         return res.json(pizzas)
     }
 }

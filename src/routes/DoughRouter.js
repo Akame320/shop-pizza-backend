@@ -4,8 +4,7 @@ const checkRole = require('../middleware/CheckRoleMiddleware')
 
 const doughController = require('../controllers/DoughController')
 
-router.post('/create', checkRole('ADMIN'), doughController.create)
-router.post('/add', checkRole('ADMIN'), doughController.addToPizza)
+router.post('/update', checkRole('ADMIN'), doughController.create)
 router.get('/', doughController.getAll)
 
 module.exports = router

@@ -23,17 +23,17 @@ const Pizza = sequelize.define('pizza', {
 const Dough = sequelize.define('dough', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: false },
-})
+}, {timestamps: false})
 
 const Size = sequelize.define('size', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: false },
-})
+}, {timestamps: false})
 
 const Categories = sequelize.define('categories', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: false },
-})
+}, {timestamps: false})
 
 const SizePizza = sequelize.define('pizza_size', {}, { timestamps: false, unique: false });
 const CategoriesPizza = sequelize.define('pizza_categories', {}, { timestamps: false, unique: false });

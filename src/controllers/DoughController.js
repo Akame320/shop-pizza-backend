@@ -10,16 +10,23 @@ class DoughController {
         res.json({ message: 'Успешно добавлено', data: type })
     }
 
-    async addToPizza(req, res, next) {
-        const { pizzaId, doughId } = req.body
-        if (!pizzaId || !doughId) return next(ApiError.badRequest('Нет обязательного параметра -:- pizzaId || doughId'))
+    async doughsAddTo(pizzaId, doughsId, next) {
+        if (!pizzaId || !doughsId) return next(ApiError.badRequest('Нет обязательного параметра -:- pizzaId'))
 
-        const dough = await DoughPizza.create({ pizzaId, doughId })
-        res.json({message: 'Успешно добавлено', data: dough})
+        const doughs = await DoughPizza.findAll({
+            where: {
+                pizzaId
+            }
+        })
+        for (const dough of doughs) await dough.destroy()
+        const convertDoughs = doughsId.map(dough => ({ pizzaId, doughId: dough }))
+        await DoughPizza.bulkCreate(convertDoughs)
     }
 
     async getAll(req, res) {
-        const doughs = await Dough.findAll()
+        const doughs = await Dough.findAll({
+            attributes: [['name', 'title'], ['id', 'value']]
+        })
         return res.json(doughs)
     }
 }

@@ -10,16 +10,23 @@ class SizeController {
         res.json({ message: 'Успешно добавлено', data: size })
     }
 
-    async addToPizza(req, res, next) {
-        const { pizzaId, sizeId } = req.body
-        if (!pizzaId || !sizeId) return next(ApiError.badRequest('Нет обязательного параметра -:- pizzaId || sizeId'))
+    async sizesAddTo(pizzaId, sizesId, next) {
+        if (!pizzaId || !sizesId) return next(ApiError.badRequest('Нет обязательного параметра -:- pizzaId'))
 
-        const sdfsdf = await SizePizza.create({ pizzaId, sizeId })
-        res.json({ message: 'Успешно добавлено', data: sdfsdf })
+        const sizes = await SizePizza.findAll({
+            where: {
+                pizzaId
+            }
+        })
+        for (const size of sizes) await size.destroy()
+        const convertSizes = sizesId.map(size => ({ pizzaId, sizeId: size }))
+        await SizePizza.bulkCreate(convertSizes)
     }
 
     async getAll(req, res) {
-        const name = await Size.findAll()
+        const name = await Size.findAll({
+            attributes: [['name', 'title'], ['id', 'value']]
+        })
         return res.json(name)
     }
 }

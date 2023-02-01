@@ -3,8 +3,7 @@ const router = new Router()
 
 const sizeController = require('../controllers/SizeController')
 
-router.post('/create', sizeController.create)
-router.post('/add', sizeController.addToPizza)
+router.post('/update', sizeController.create)
 router.get('/', sizeController.getAll)
 
 module.exports = router

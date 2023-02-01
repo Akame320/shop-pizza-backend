@@ -10,12 +10,18 @@ class CategoriesController {
         res.json({ message: 'Успешно добавлено', data: createdCategories })
     }
 
-    async addToPizza(req, res, next) {
-        const { pizzaId, categoryId } = req.body
-        if (!pizzaId && !categoryId) return next(ApiError.badRequest('нет обязательного аттрибута -:- pizzaId || categoryId'))
+    async categoriesAddTo(pizzaId, categoriesId, next) {
+        if (!pizzaId && !categoriesId) return next(ApiError.badRequest('нет обязательного аттрибута -:- pizzaId || itemsId'))
 
-        const categories = await CategoriesPizza.create({ pizzaId, categoryId })
-        res.json({ message: 'Успешно добавлено', data: categories })
+        const categories = await CategoriesPizza.findAll({
+            where: {
+                pizzaId
+            }
+        })
+
+        for (const category of categories) await category.destroy()
+        const convertCategories = categoriesId.map(item => ({ pizzaId, categoryId: item }))
+        await CategoriesPizza.bulkCreate(convertCategories)
     }
 
     async getAll(req, res, next) {

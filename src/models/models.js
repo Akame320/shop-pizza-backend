@@ -20,24 +20,24 @@ const Pizza = sequelize.define('pizza', {
     img: { type: DataTypes.STRING, allowNull: false },
 })
 
-const Dough = sequelize.define('dough', {
+const Type = sequelize.define('type', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    name: { type: DataTypes.STRING, allowNull: false },
+    value: { type: DataTypes.STRING, allowNull: false },
 }, {timestamps: false})
 
 const Size = sequelize.define('size', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    name: { type: DataTypes.STRING, allowNull: false },
+    value: { type: DataTypes.INTEGER, allowNull: false },
 }, {timestamps: false})
 
 const Categories = sequelize.define('categories', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    name: { type: DataTypes.STRING, allowNull: false },
+    value: { type: DataTypes.STRING, allowNull: false },
 }, {timestamps: false})
 
 const SizePizza = sequelize.define('pizza_size', {price: DataTypes.INTEGER}, { timestamps: false, unique: false });
 const CategoriesPizza = sequelize.define('pizza_categories', {}, { timestamps: false, unique: false });
-const DoughPizza = sequelize.define('pizza_dough', {price: DataTypes.INTEGER}, { timestamps: false, unique: false })
+const TypePizza = sequelize.define('pizza_type', {price: DataTypes.INTEGER}, { timestamps: false, unique: false })
 const PizzaBasket = sequelize.define('pizza_basket', {
     size: { type: DataTypes.STRING, allowNull: false },
     dough: { type: DataTypes.STRING, allowNull: false },
@@ -46,7 +46,7 @@ const PizzaBasket = sequelize.define('pizza_basket', {
 
 Pizza.belongsToMany(Size, { through: SizePizza });
 Pizza.belongsToMany(Categories, { through: CategoriesPizza });
-Pizza.belongsToMany(Dough, { through: DoughPizza });
+Pizza.belongsToMany(Type, { through: TypePizza });
 
 User.belongsTo(Basket)
 Basket.belongsToMany(Pizza, { through: PizzaBasket })
@@ -54,12 +54,12 @@ Basket.belongsToMany(Pizza, { through: PizzaBasket })
 module.exports = {
     User,
     Pizza,
-    Dough,
+    Type,
     Size,
     Basket,
     SizePizza,
     Categories,
-    DoughPizza,
+    TypePizza,
     CategoriesPizza,
     PizzaBasket
 }

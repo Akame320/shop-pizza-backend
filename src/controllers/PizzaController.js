@@ -1,12 +1,9 @@
-const { Pizza, Size, Dough, Categories } = require('../models/models')
+const { Pizza, Size, Type, Categories } = require('../models/models')
 const ApiError = require('../error/ApiError')
 const uuid = require('uuid')
 const path = require('path')
 const { where } = require("sequelize");
 const fs = require("fs");
-const CategoriesController = require("./CategoriesController")
-const SizeController = require("./SizeController")
-const DoughController = require("./DoughController")
 
 class PizzaController {
     async create(req, res, next) {
@@ -28,7 +25,7 @@ class PizzaController {
             attributes: {
                 exclude: ['createdAt', 'updatedAt'],
             },
-            include: [Size, Dough, Categories],
+            include: [Size, Type, Categories],
             order: [['name', 'ASC']],
         })
         return res.json(pizzas)
@@ -69,13 +66,13 @@ class PizzaController {
             { where: { id } }
         )
 
-        await CategoriesController.categoriesAddTo(id, categoriesId.split(','), next)
-        await SizeController.sizesAddTo(id, sizesId.split(','), next)
-        await DoughController.doughsAddTo(id, doughsId.split(','), next)
+        // await CategoriesController.categoriesAddTo(id, categoriesId.split(','), next)
+        // await SizeController.sizesAddTo(id, sizesId.split(','), next)
+        // await DoughController.doughsAddTo(id, doughsId.split(','), next)
 
         const pizzas = await Pizza.findAll({
             order: [['name', 'ASC']],
-            include: [Size, Dough, Categories]
+            include: [Size, Type, Categories]
         })
         return res.json(pizzas)
     }

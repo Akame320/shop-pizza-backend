@@ -4,19 +4,29 @@ const uuid = require('uuid')
 const path = require('path')
 const { where } = require("sequelize");
 const fs = require("fs");
+const Addons = require('../controllers/AddonController')
 
 class PizzaController {
     async create(req, res, next) {
         try {
-            const { name, price } = req.body
+            const { name, sizes, types, categories, minPrice } = req.body
             const { img } = req.files
             let fileName = uuid.v4() + ".png"
             img.mv(path.resolve(__dirname, '..', '..', 'static', fileName))
 
-            const pizza = await Pizza.create({ name, price, img: fileName })
-            return res.json(pizza)
+            const pizza = await Pizza.create({ name, img: fileName, price: 0 })
+
+            await Addons.updatePizzaAddons(pizza.id, JSON.parse(sizes), JSON.parse(types), categories.split(','))
+            const response = await Pizza.findAll({
+                attributes: {
+                    exclude: ['createdAt', 'updatedAt'],
+                },
+                include: [Size, Type, Categories],
+                order: [['name', 'ASC']],
+            })
+            return res.json(response)
         } catch (e) {
-            next(ApiError.badRequest(e.message))
+            return next(ApiError.badRequest(e.message))
         }
     }
 
@@ -41,7 +51,7 @@ class PizzaController {
     }
 
     async updateOne(req, res, next) {
-        const { id, name, price, categoriesId, sizesId, doughsId } = req.body
+        const { id, name, price, categoriesId, sizesId, typesId } = req.body
         const { img } = req.files || ''
 
         if (!id) return next(ApiError.badRequest('Нет id'))
@@ -66,15 +76,28 @@ class PizzaController {
             { where: { id } }
         )
 
-        // await CategoriesController.categoriesAddTo(id, categoriesId.split(','), next)
-        // await SizeController.sizesAddTo(id, sizesId.split(','), next)
-        // await DoughController.doughsAddTo(id, doughsId.split(','), next)
+        await Addons.updatePizzaAddons(id, sizesId.split(','), typesId.split(','), categoriesId.split(','))
 
         const pizzas = await Pizza.findAll({
             order: [['name', 'ASC']],
             include: [Size, Type, Categories]
         })
         return res.json(pizzas)
+    }
+
+    async deleteOne(req, res, next) {
+        const { id } = req.params
+        let response = null
+        try {
+            const pizza = await Pizza.findByPk(id)
+            await Pizza.destroy({ where: { id } })
+            fs.unlinkSync(path.resolve(__dirname, '..', '..', 'static', pizza.img))
+            response = await Pizza.findAll()
+        } catch (e) {
+            return next(ApiError.badRequest(e.message))
+        }
+
+        res.json(response)
     }
 }
 

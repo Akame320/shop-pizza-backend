@@ -10,7 +10,7 @@ function generateToken(id, email, role) {
 class UserController {
     async registration(req, res, next) {
         const { email, password, role } = req.body
-        if (!email || !password) return next(ApiError.badRequest('Password или email не заданы'))
+        if (!email || !password) return next(ApiError.badRequest('Нет параметра -:- Password или Email'))
 
         const candidate = await User.findOne({
             where: { email }
@@ -27,16 +27,20 @@ class UserController {
 
     async login(req, res, next) {
         const { email, password } = req.body
-        if (!email || !password) return next(ApiError.badRequest('Password или email не заданы'))
+        if (!email || !password) return next(ApiError.badRequest('Нет параметра -:- Password или Email'))
 
-        const user = await User.findOne({ where: { email } })
-        if (!user) return next(ApiError.badRequest(`Пользователя с email - ${email} не существует`))
+        try {
+            const user = await User.findOne({ where: { email } })
+            if (!user) return next(ApiError.badRequest(`Пользователя с email - ${email} не существует`))
 
-        const validatePassword = bcrypt.compareSync(password, user.password)
-        if (!validatePassword) return next(ApiError.badRequest('Пароль не правильный'))
+            const validatePassword = bcrypt.compareSync(password, user.password)
+            if (!validatePassword) return next(ApiError.badRequest('Пароль не правильный'))
 
-        const token = generateToken(user.id, user.email, user.role)
-        res.json({ token, user })
+            const token = generateToken(user.id, user.email, user.role)
+            res.json({ token, user })
+        } catch (e) {
+            next(ApiError.badRequest(e))
+        }
     }
 
     async check(req, res, next) {

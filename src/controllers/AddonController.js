@@ -1,4 +1,4 @@
-const { Size, Categories, Type } = require('../models/models')
+const { Size, SizePizza, Categories, CategoriesPizza, Type, TypePizza } = require('../models/models')
 const ApiError = require('../error/ApiError')
 
 class AddonController {
@@ -58,6 +58,20 @@ class AddonController {
             categories: [...createdCategories],
             types: [...createdTypes]
         })
+    }
+
+    async updatePizzaAddons(pizzaId, sizes, types, categories) {
+        await SizePizza.destroy({where: {pizzaId}})
+        await CategoriesPizza.destroy({where: {pizzaId}})
+        await TypePizza.destroy({where: {pizzaId}})
+
+        const convertSize = sizes.map(item => ({pizzaId, sizeId: item.id, price: +item.price}))
+        const convertCategories = categories.map(item => ({pizzaId, categoryId: item}))
+        const convertTypes = types.map(item => ({pizzaId, typeId: item.id, price: +item.price}))
+
+        await SizePizza.bulkCreate(convertSize)
+        await CategoriesPizza.bulkCreate(convertCategories)
+        await TypePizza.bulkCreate(convertTypes)
     }
 
     async findAll(req, res) {

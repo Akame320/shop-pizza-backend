@@ -9,7 +9,7 @@ const Addons = require('../controllers/AddonController')
 class PizzaController {
     async create(req, res, next) {
         try {
-            const { name, sizes, types, categories, minPrice } = req.body
+            const { name, sizes, types, categories } = req.body
             const { img } = req.files
             let fileName = uuid.v4() + ".png"
             img.mv(path.resolve(__dirname, '..', '..', 'static', fileName))
@@ -38,7 +38,31 @@ class PizzaController {
             include: [Size, Type, Categories],
             order: [['name', 'ASC']],
         })
-        return res.json(pizzas)
+
+
+        const convertPizzas = pizzas.map(item => {
+            return {
+                id: item.id,
+                name: item.name,
+                img: item.img,
+                sizes: item.sizes.map(itemSize => {
+                    return {
+                        id: itemSize.id,
+                        value: itemSize.value,
+                        price: itemSize.pizza_size.dataValues.price
+                    }
+                }),
+                types: item.types.map(itemType => {
+                    return {
+                        id: itemType.id,
+                        value: itemType.value,
+                        price: itemType.pizza_type.dataValues.price
+                    }
+                })
+            }
+        })
+
+        return res.json(convertPizzas)
     }
 
     async getOne(req, res, next) {

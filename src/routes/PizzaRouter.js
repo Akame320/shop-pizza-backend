@@ -4,6 +4,7 @@ const router = new Router()
 const pizzaController = require('../controllers/PizzaController')
 
 router.post('/', pizzaController.create)
+router.put('/', pizzaController.updateOne)
 router.get('/', pizzaController.getAll)
 router.get('/:id', pizzaController.getOne)
 router.delete('/:id', pizzaController.deleteOne)

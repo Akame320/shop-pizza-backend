@@ -6,6 +6,31 @@ const { where } = require("sequelize");
 const fs = require("fs");
 const Addons = require('../controllers/AddonController')
 
+const formData = (data) => {
+    return data.map(item => {
+        return {
+            id: item.id,
+            name: item.name,
+            img: item.img,
+            sizes: item.sizes.map(itemSize => {
+                return {
+                    id: itemSize.id,
+                    value: itemSize.value,
+                    price: itemSize.pizza_size.dataValues.price
+                }
+            }),
+            types: item.types.map(itemType => {
+                return {
+                    id: itemType.id,
+                    value: itemType.value,
+                    price: itemType.pizza_type.dataValues.price
+                }
+            }),
+            categories: item.categories.map(itemCategory => (itemCategory.id))
+        }
+    })
+}
+
 class PizzaController {
     async create(req, res, next) {
         try {
@@ -24,7 +49,9 @@ class PizzaController {
                 include: [Size, Type, Categories],
                 order: [['name', 'ASC']],
             })
-            return res.json(response)
+
+            const convertPizzas = formData(response)
+            return res.json(convertPizzas)
         } catch (e) {
             return next(ApiError.badRequest(e.message))
         }
@@ -40,28 +67,7 @@ class PizzaController {
         })
 
 
-        const convertPizzas = pizzas.map(item => {
-            return {
-                id: item.id,
-                name: item.name,
-                img: item.img,
-                sizes: item.sizes.map(itemSize => {
-                    return {
-                        id: itemSize.id,
-                        value: itemSize.value,
-                        price: itemSize.pizza_size.dataValues.price
-                    }
-                }),
-                types: item.types.map(itemType => {
-                    return {
-                        id: itemType.id,
-                        value: itemType.value,
-                        price: itemType.pizza_type.dataValues.price
-                    }
-                })
-            }
-        })
-
+        const convertPizzas = formData(pizzas)
         return res.json(convertPizzas)
     }
 
@@ -75,38 +81,39 @@ class PizzaController {
     }
 
     async updateOne(req, res, next) {
-        const { id, name, price, categoriesId, sizesId, typesId } = req.body
-        const { img } = req.files || ''
+        try {
+            const { id, name, categories, sizes, types } = req.body
+            const { img } = req.files || ''
 
-        if (!id) return next(ApiError.badRequest('Нет id'))
+            const pizza = await Pizza.findByPk(id)
+            let fileName = pizza.img
 
-        const pizza = await Pizza.findByPk(id)
-        if (!pizza) return next(ApiError.badRequest('Нет пиццы с id -:- ' + id))
+            if (img) {
+                const oldImg = pizza.img
+                fs.unlink(path.resolve(__dirname, '..', '..', 'static', oldImg), (err) => {
+                    if (err) return next(ApiError.badRequest(err))
+                })
 
-        let fileName = pizza.img
+                fileName = uuid.v4() + ".png"
+                img.mv(path.resolve(__dirname, '..', '..', 'static', fileName))
+            }
 
-        if (img) {
-            const oldImg = pizza.img
-            fs.unlink(path.resolve(__dirname, '..', '..', 'static', oldImg), (err) => {
-                if (err) return next(ApiError.badRequest(err))
+            await Pizza.update(
+                { name, img: fileName },
+                { where: { id } }
+            )
+
+            await Addons.updatePizzaAddons(id, JSON.parse(sizes), JSON.parse(types), categories.split(','))
+
+            const pizzas = await Pizza.findAll({
+                order: [['name', 'ASC']],
+                include: [Size, Type, Categories]
             })
 
-            fileName = uuid.v4() + ".png"
-            img.mv(path.resolve(__dirname, '..', '..', 'static', fileName))
+            return res.json(pizzas)
+        } catch (e) {
+            return next(ApiError.badRequest(e))
         }
-
-        await Pizza.update(
-            { name, price, img: fileName },
-            { where: { id } }
-        )
-
-        await Addons.updatePizzaAddons(id, sizesId.split(','), typesId.split(','), categoriesId.split(','))
-
-        const pizzas = await Pizza.findAll({
-            order: [['name', 'ASC']],
-            include: [Size, Type, Categories]
-        })
-        return res.json(pizzas)
     }
 
     async deleteOne(req, res, next) {

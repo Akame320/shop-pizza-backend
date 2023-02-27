@@ -77,7 +77,9 @@ class AddonController {
     async findAll(req, res) {
         const dbSizes = await Size.findAll()
         const dbTypes = await Type.findAll()
-        const dbCategories = await Categories.findAll()
+        const dbCategories = await Categories.findAll({
+            attributes: [['id', 'value'], ['value', 'title']],
+        })
 
         res.json({
             sizes: [...dbSizes || []],

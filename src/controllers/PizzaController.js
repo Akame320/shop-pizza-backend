@@ -110,7 +110,8 @@ class PizzaController {
                 include: [Size, Type, Categories]
             })
 
-            return res.json(pizzas)
+            const convertPizzas = formData(pizzas)
+            return res.json(convertPizzas)
         } catch (e) {
             return next(ApiError.badRequest(e))
         }
@@ -123,12 +124,17 @@ class PizzaController {
             const pizza = await Pizza.findByPk(id)
             await Pizza.destroy({ where: { id } })
             fs.unlinkSync(path.resolve(__dirname, '..', '..', 'static', pizza.img))
-            response = await Pizza.findAll()
+            response = await Pizza.findAll({
+                order: [['name', 'ASC']],
+                include: [Size, Type, Categories]
+            })
+
         } catch (e) {
             return next(ApiError.badRequest(e.message))
         }
 
-        res.json(response)
+        const convertPizzas = formData(response)
+        res.json(convertPizzas)
     }
 }
 

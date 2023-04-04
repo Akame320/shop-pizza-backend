@@ -35,9 +35,9 @@ class PizzaController {
     async create(req, res, next) {
         try {
             const { name, sizes, types, categories } = req.body
-            const { img } = req.files
+            const { imgFile } = req.files
             let fileName = uuid.v4() + ".png"
-            img.mv(path.resolve(__dirname, '..', '..', 'static', fileName))
+            imgFile.mv(path.resolve(__dirname, '..', '..', 'static', fileName))
 
             const pizza = await Pizza.create({ name, img: fileName, price: 0 })
 
@@ -80,42 +80,6 @@ class PizzaController {
         res.json({ data: pizza })
     }
 
-    async updateOne(req, res, next) {
-        try {
-            const { id, name, categories, sizes, types } = req.body
-            const { img } = req.files || ''
-
-            const pizza = await Pizza.findByPk(id)
-            let fileName = pizza.img
-
-            if (img) {
-                const oldImg = pizza.img
-                fs.unlink(path.resolve(__dirname, '..', '..', 'static', oldImg), (err) => {
-                    if (err) return next(ApiError.badRequest(err))
-                })
-
-                fileName = uuid.v4() + ".png"
-                img.mv(path.resolve(__dirname, '..', '..', 'static', fileName))
-            }
-
-            await Pizza.update(
-                { name, img: fileName },
-                { where: { id } }
-            )
-
-            await Addons.updatePizzaAddons(id, JSON.parse(sizes), JSON.parse(types), categories.split(','))
-
-            const pizzas = await Pizza.findAll({
-                order: [['name', 'ASC']],
-                include: [Size, Type, Categories]
-            })
-
-            const convertPizzas = formData(pizzas)
-            return res.json(convertPizzas)
-        } catch (e) {
-            return next(ApiError.badRequest(e))
-        }
-    }
 
     async deleteOne(req, res, next) {
         const { id } = req.params
@@ -135,6 +99,17 @@ class PizzaController {
 
         const convertPizzas = formData(response)
         res.json(convertPizzas)
+    }
+
+    async __getPizzas() {
+        const pizzas = await Pizza.findAll({
+            attributes: {
+                exclude: ['createdAt', 'updatedAt'],
+            },
+            include: [Size, Type, Categories],
+            order: [['name', 'ASC']],
+        })
+        return formData(pizzas)
     }
 }
 

@@ -16,7 +16,6 @@ const Basket = sequelize.define('basket', {
 const Pizza = sequelize.define('pizza', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, unique: true, allowNull: false },
-    price: { type: DataTypes.INTEGER, allowNull: false },
     img: { type: DataTypes.STRING, allowNull: false },
 })
 
@@ -39,10 +38,13 @@ const SizePizza = sequelize.define('pizza_size', {price: DataTypes.INTEGER}, { t
 const CategoriesPizza = sequelize.define('pizza_categories', {}, { timestamps: false, unique: false });
 const TypePizza = sequelize.define('pizza_type', {price: DataTypes.INTEGER}, { timestamps: false, unique: false })
 const PizzaBasket = sequelize.define('pizza_basket', {
+    name: { type: DataTypes.STRING, allowNull: false },
+    price: { type: DataTypes.INTEGER, allowNull: false },
+    img: { type: DataTypes.STRING, allowNull: false },
     size: { type: DataTypes.STRING, allowNull: false },
     dough: { type: DataTypes.STRING, allowNull: false },
     count: { type: DataTypes.INTEGER, allowNull: false },
-}, { timestamps: false, unique: false })
+}, { unique: false })
 
 Pizza.belongsToMany(Size, { through: SizePizza });
 Pizza.belongsToMany(Categories, { through: CategoriesPizza });

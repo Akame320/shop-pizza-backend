@@ -1,12 +1,12 @@
 const Router = require('express')
 const router = new Router()
 
-const pizzaController = require('../controllers/PizzaController')
+const ProductController = require('../services/Products')
 
-router.post('/', pizzaController.create)
-router.put('/', pizzaController.updateOne)
-router.get('/', pizzaController.getAll)
-router.get('/:id', pizzaController.getOne)
-router.delete('/:id', pizzaController.deleteOne)
+router.post('/', ProductController.create)
+router.put('/', ProductController.update)
+router.get('/', ProductController.get)
+router.get('/:id', ProductController.get)
+router.delete('/:id', ProductController.delete)
 
 module.exports = router

@@ -1,17 +1,61 @@
-const { Basket, PizzaBasket, Pizza } = require('../models/models')
+const { Basket, PizzaBasket, Pizza, Size, Type, Categories } = require('../models/models')
 const ApiError = require('../error/ApiError')
+const PizzaController = require('../controllers/PizzaController')
+const jwt = require("jsonwebtoken");
+
+const validatePizza = (pizzaDb, pizzaBasket) => {
+    let isValid = true
+
+    isValid = pizzaBasket.name === pizzaDb.name
+
+    const searchType = pizzaDb.types.find(item => item.id === pizzaBasket.type.id)
+    const searchSize = pizzaDb.sizes.find(item => item.id === pizzaBasket.size.id)
+
+    Object.keys(pizzaBasket.type).forEach(key => {
+        isValid = pizzaBasket.type[key] === searchType[key]
+    })
+
+    Object.keys(pizzaBasket.size).forEach(key => {
+        isValid = pizzaBasket.size[key] === searchSize[key]
+    })
+
+    return isValid
+}
+
+const validateBasket = (pizzasDb, basket) => {
+    let valid = true
+
+    basket.forEach((pizzaFromBask) => {
+        const search = pizzasDb.find(item => item.id === pizzaFromBask.id)
+        valid = validatePizza(search, pizzaFromBask)
+    })
+
+    return valid
+}
 
 class BasketController {
     async update(req, res, next) {
-        const { basketId, products } = req.body
-        if (!basketId || !products) return next(ApiError.badRequest('Нет обязательного параметра -:- basketId || products'))
+        try {
+            const { basket } = req.body
+            const user = req.user
 
-        const bulkProducts = products.map(product => {
-            return { ...product, basketId }
-        })
+            const pizzas = await PizzaController.__getPizzas()
+            const isValid = validateBasket(pizzas, basket)
 
-        const basket = await PizzaBasket.bulkCreate(bulkProducts)
-        res.json({ message: 'Есть успех' })
+            const added = await Basket.create()
+
+            res.json(isValid)
+        } catch (e) {
+            return next(ApiError.badRequest(e))
+        }
+    }
+
+    async payment(req, res, next) {
+        try {
+
+        } catch (e) {
+            return next(ApiError.badRequest(e))
+        }
     }
 
     async increment(req, res, next) {
@@ -37,6 +81,38 @@ class BasketController {
         })
         res.json(basket)
     }
+
+    // async saveBasket(req, res, next) {
+    //     const { userId } = req.body
+    // }
 }
+
+/**
+ * basket: [
+ * {
+ *     name: String
+ *     img: String
+ *     type: {
+ *         id: number
+ *         value: string
+ *         price: number
+ *     }
+ * }
+ * ]
+ */
+
+/**
+ *
+ * Нужно принять запрос.
+ *
+ * Проверить цены. Наличие типа, Наличие размера по имени/id
+ *
+ * Если все верно
+ * - Отправить в ответ true
+ * - Сохранить в корзину пользователя
+ * -
+ *
+ * Если есть ошибки, отправить false
+ */
 
 module.exports = new BasketController()

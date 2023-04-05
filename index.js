@@ -1,8 +1,7 @@
 require('dotenv').config()
+const { sequelize } = require('./src/models/index')
 const express = require('express')
 const fileUpload = require('express-fileupload')
-const sequelize = require('./db')
-const models = require('./src/models/models')
 const cors = require('cors')
 const router = require('./src/routes/index')
 const path = require('path')
@@ -20,13 +19,24 @@ app.use(errorHandler)
 
 const start = async () => {
     try {
-        await sequelize.authenticate()
+        await sequelize.authenticate();
         await sequelize.sync()
+
+        console.log('////////////////////////////////////////////////////////////////////');
+        console.log('DB -:- Connection has been established successfully.');
+    } catch (error) {
+        console.log('?????????????????????????????????????????????????????????????????????');
+        console.error('ERROR -:- Unable to connect to the database:', error);
+    }
+
+    try {
         app.listen(PORT, () => {
-            console.log('Server started -:- ' + PORT)
+            console.log('SERVER -:- Server started in port = ' + PORT)
+            console.log('////////////////////////////////////////////////////////////////////');
         })
-    } catch (e) {
-        console.log(e)
+    } catch (error) {
+        console.error('ERROR -:- Unable to start server:', error);
+        console.log('?????????????????????????????????????????????????????????????????????');
     }
 }
 

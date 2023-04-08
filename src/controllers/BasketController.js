@@ -1,61 +1,59 @@
-const { Basket, PizzaBasket, Pizza, Size, Type, Categories } = require('../models/models')
 const ApiError = require('../error/ApiError')
-const PizzaController = require('../controllers/PizzaController')
 const jwt = require("jsonwebtoken");
 
 const validatePizza = (pizzaDb, pizzaBasket) => {
-    let isValid = true
-
-    isValid = pizzaBasket.name === pizzaDb.name
-
-    const searchType = pizzaDb.types.find(item => item.id === pizzaBasket.type.id)
-    const searchSize = pizzaDb.sizes.find(item => item.id === pizzaBasket.size.id)
-
-    Object.keys(pizzaBasket.type).forEach(key => {
-        isValid = pizzaBasket.type[key] === searchType[key]
-    })
-
-    Object.keys(pizzaBasket.size).forEach(key => {
-        isValid = pizzaBasket.size[key] === searchSize[key]
-    })
-
-    return isValid
+    // let isValid = true
+    //
+    // isValid = pizzaBasket.name === pizzaDb.name
+    //
+    // const searchType = pizzaDb.types.find(item => item.id === pizzaBasket.type.id)
+    // const searchSize = pizzaDb.sizes.find(item => item.id === pizzaBasket.size.id)
+    //
+    // Object.keys(pizzaBasket.type).forEach(key => {
+    //     isValid = pizzaBasket.type[key] === searchType[key]
+    // })
+    //
+    // Object.keys(pizzaBasket.size).forEach(key => {
+    //     isValid = pizzaBasket.size[key] === searchSize[key]
+    // })
+    //
+    // return isValid
 }
 
 const validateBasket = (pizzasDb, basket) => {
-    let valid = true
-
-    basket.forEach((pizzaFromBask) => {
-        const search = pizzasDb.find(item => item.id === pizzaFromBask.id)
-        valid = validatePizza(search, pizzaFromBask)
-    })
-
-    return valid
+    // let valid = true
+    //
+    // basket.forEach((pizzaFromBask) => {
+    //     const search = pizzasDb.find(item => item.id === pizzaFromBask.id)
+    //     valid = validatePizza(search, pizzaFromBask)
+    // })
+    //
+    // return valid
 }
 
 class BasketController {
     async update(req, res, next) {
-        try {
-            const { basket } = req.body
-            const user = req.user
-
-            const pizzas = await PizzaController.__getPizzas()
-            const isValid = validateBasket(pizzas, basket)
-
-            const added = await Basket.create()
-
-            res.json(isValid)
-        } catch (e) {
-            return next(ApiError.badRequest(e))
-        }
+        // try {
+        //     const { basket } = req.body
+        //     const user = req.user
+        //
+        //     const pizzas = await PizzaController.__getPizzas()
+        //     const isValid = validateBasket(pizzas, basket)
+        //
+        //     const added = await Basket.create()
+        //
+        //     res.json(isValid)
+        // } catch (e) {
+        //     return next(ApiError.badRequest(e))
+        // }
     }
 
     async payment(req, res, next) {
-        try {
-
-        } catch (e) {
-            return next(ApiError.badRequest(e))
-        }
+        // try {
+        //
+        // } catch (e) {
+        //     return next(ApiError.badRequest(e))
+        // }
     }
 
     async increment(req, res, next) {
@@ -71,20 +69,20 @@ class BasketController {
     }
 
     async getBask(req, res, next) {
-        const { basketId } = req.body
-        if (!basketId) return next(ApiError.badRequest('Нет обязательного параметра -:- basketId || products'))
-
-        const basket = await Basket.findOne({
-            where: {
-                id: basketId
-            }, attributes: ['id'], include: [Pizza]
-        })
-        res.json(basket)
+        // const { basketId } = req.body
+        // if (!basketId) return next(ApiError.badRequest('Нет обязательного параметра -:- basketId || products'))
+        //
+        // const basket = await Basket.findOne({
+        //     where: {
+        //         id: basketId
+        //     }, attributes: ['id'], include: [Pizza]
+        // })
+        // res.json(basket)
     }
 
-    // async saveBasket(req, res, next) {
-    //     const { userId } = req.body
-    // }
+    async saveBasket(req, res, next) {
+        // const { userId } = req.body
+    }
 }
 
 /**

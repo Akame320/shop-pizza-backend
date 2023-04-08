@@ -1,17 +1,17 @@
 const jwt = require('jsonwebtoken')
+const ApiError = require("../error/ApiError");
 
-module.exports = function (req, res, next) {
+module.exports = async function (req, res, next) {
     if (req.method === 'OPTIONS') {
         next()
     }
 
     try {
         const token = req.headers.authorization.split(' ')[1]
-        if (!token) return res.status(401).json({message: 'Пользователь не авторизован'})
-        const decoded = jwt.verify(token, 'pizzaSecret')
-        req.user = decoded
+        if (!token) return res.status(401).json(ApiError.forbidden('No Auth'))
+        req.user = jwt.verify(token, 'pizzaSecret')
         next()
     }catch (e) {
-        res.status(500).json({message: 'Ошибка сервера </br>' + e})
+        return res.json(ApiError.forbidden(e))
     }
 }

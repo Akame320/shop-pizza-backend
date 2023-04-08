@@ -1,9 +1,10 @@
-const { Pizza, Size, Type, Categories } = require("../models/models");
 const fs = require("fs");
 const path = require("path");
 const ApiError = require("../error/ApiError");
 const uuid = require("uuid");
-const Addons = require("../controllers/AddonController");
+const Addons = require("./Addon");
+const { sequelize: db } = require("../models/index")
+
 const formData = (data) => {
     return data.map(item => {
         return {
@@ -30,14 +31,11 @@ const formData = (data) => {
 }
 
 class PizzaService {
-    constructor() {
-    }
+    constructor() {}
 
     #settings = {
-        attributes: {
-            exclude: ['createdAt', 'updatedAt'],
-        },
-        include: [Size, Type, Categories],
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+        include: [db.models.Size, db.models.Border, db.models.Category],
         order: [['name', 'ASC']],
     }
 
@@ -45,9 +43,9 @@ class PizzaService {
         let out = null
 
         if (id) {
-            out = await Pizza.findByPk(id)
+            out = await db.models.Pizza.findByPk(id)
         } else {
-            out = await Pizza.findAll(this.#settings)
+            out = await db.models.Pizza.findAll(this.#settings)
         }
 
         return formData(out)
@@ -56,7 +54,7 @@ class PizzaService {
     async deletePizza(id) {
         try {
             const pizza = await Pizza.findByPk(id)
-            await Pizza.destroy({ where: { id } })
+            await db.models.Pizza.destroy({ where: { id } })
             fs.unlinkSync(path.resolve(__dirname, '..', '..', 'static', pizza.img))
 
             return this.get()
@@ -84,7 +82,7 @@ class PizzaService {
         if (fileName instanceof ApiError) return fileName
 
         try {
-            const newPizza = await Pizza.create({ name, img: fileName })
+            const newPizza = await db.models.Pizza.create({ name, img: fileName })
             await Addons.updatePizzaAddons(newPizza.id, sizes, types, categories)
 
             return await this.get()
@@ -112,7 +110,7 @@ class PizzaService {
         const payment = {} // Object for combine new properties for update Pizza
 
 
-        const pizza = await Pizza.findByPk(id)
+        const pizza = await db.models.Pizza.findByPk(id)
         if (!pizza) return ApiError.badRequest('Not pizza for id -:- ' + id)
 
         if (imgFile) {
@@ -135,7 +133,7 @@ class PizzaService {
             payment.name = name
         }
 
-        await Pizza.update(payment, { where: { id } })
+        await db.models.Pizza.update(payment, { where: { id } })
         return await this.get()
     }
 

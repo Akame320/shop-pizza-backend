@@ -60,8 +60,13 @@ class UserController {
         res.send()
     }
 
-    static async test(req, res) {
-        res.json({ message: 'Gooooooooooood !!!!!!' })
+    static async getUser(req, res, next) {
+        const { refreshToken } = req.cookies
+        if (!refreshToken) return next(ApiError.badRequest('Not refresh Token'))
+
+        const user = await UserService.get({token: refreshToken})
+        console.log(user)
+        res.json(user)
     }
 }
 
@@ -70,5 +75,6 @@ router.post('/registration', UserController.registration)
 router.post('/login', UserController.login)
 router.get('/check', UserController.check)
 router.get('/logout', UserController.logout)
+router.get('/', UserController.getUser)
 
 module.exports = router

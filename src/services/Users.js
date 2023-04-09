@@ -29,6 +29,7 @@ class UserService {
             email,
             role,
             firstName: other.firstName,
+            lastName: other.lastName,
             password: hashPassword,
             basketId: basket.id,
             token: refreshToken
@@ -49,6 +50,8 @@ class UserService {
 
             const token = this.#accessToken(userForAuth.id, userForAuth.email, userForAuth.role)
             const refreshToken = this.#refreshToken()
+            userForAuth.token = refreshToken
+            userForAuth.save()
 
 
             return { data: userForAuth, token, refreshToken }
@@ -80,6 +83,19 @@ class UserService {
         } catch (e) {
             return ApiError.badRequest(e)
         }
+    }
+
+    async get(query) {
+        const queries = ['token', 'id', 'email']
+        let indexKey = null
+        Object.keys(query).forEach(key => {
+            indexKey = queries.indexOf(key)
+        })
+        if (indexKey === -1) return ApiError.badRequest('invalid query param')
+
+        const key = {}
+        key[queries[indexKey]] = query[queries[indexKey]]
+        return await this.#getUser(key)
     }
 }
 

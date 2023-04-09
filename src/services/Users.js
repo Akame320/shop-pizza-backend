@@ -18,7 +18,7 @@ class UserService {
         return await db.models.User.findOne({ where: query })
     }
 
-    async registration(email, password, role = 'user') {
+    async registration(email, password, role = 'user', other = {}) {
         const isEmailUsed = await this.#getUser({ email })
         if (isEmailUsed) return ApiError.badRequest('Email used')
 
@@ -28,6 +28,7 @@ class UserService {
         const user = await db.models.User.create({
             email,
             role,
+            firstName: other.firstName,
             password: hashPassword,
             basketId: basket.id,
             token: refreshToken

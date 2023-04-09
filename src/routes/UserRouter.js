@@ -8,9 +8,9 @@ const jwt = require("jsonwebtoken");
 class UserController {
     static async registration(req, res, next) {
         if (!req.body.email || !req.body.password) return next(ApiError.badRequest('Invalid data'))
-        const { email, password, role } = req.body
+        const { email, password, role, other } = req.body
 
-        const user = await UserService.registration(email, password, role)
+        const user = await UserService.registration(email, password, role, other)
         if (user instanceof ApiError) return next(ApiError.badRequest(user))
 
         res.cookie('refreshToken', user.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false })
